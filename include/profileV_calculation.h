@@ -8,7 +8,7 @@
 #include<cmath>
 #include"system.h"
 #include"functions.h"
+
 using namespace std;
 
-long int countDumpFrame(const string& dumpFileName);
-
+void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double zhil, int nslice);

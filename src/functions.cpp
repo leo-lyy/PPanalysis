@@ -45,3 +45,49 @@ axis unitVec(axis& vec)
     };
 
 }
+void vecInit(vector<vector<axis>>& v, long int molNum, const long int maxhelix)
+{
+    v.resize(molNum + 1);
+    for (long int i = 1; i<= molNum; i++)
+    {
+        v[i].resize(maxhelix);
+    }
+}
+double degVec(axis& a, axis& b)
+{
+
+    double norm_a = norm(a);
+    double norm_b = norm(b);
+
+    if (norm_a == 0 || norm_b == 0) {
+
+        throw std::invalid_argument("One of the vectors has zero length");
+    }
+
+    double dot_product = a.x * b.x + a.y * b.y + a.z * b.z;
+    double cos_theta = dot_product / (norm_a * norm_b);
+
+    // Ensure the value is within the valid range for acos
+    if (cos_theta < -1.0) cos_theta = -1.0;
+    if (cos_theta > 1.0) cos_theta = 1.0;
+
+    double angle_radians = acos(cos_theta);
+    double angle_degrees = angle_radians * (180.0 / M_PI);
+
+    return angle_degrees;
+
+}
+void printProgressBar(int k, int kmax) {
+    int barWidth = 50;  // Width of the progress bar
+    float progress = static_cast<float>(k) / kmax;
+    int pos = static_cast<int>(barWidth * progress);
+
+    std::cout << "[";
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << "=";
+        else if (i == pos) std::cout << ">";
+        else std::cout << " ";
+    }
+    std::cout << "] " << int(progress * 100.0) << " % (" << k << "/" << kmax << ")\r";
+    std::cout.flush();
+}

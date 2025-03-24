@@ -22,5 +22,6 @@ void readBonds(ifstream& file, System& system);
 void readAngles(ifstream& file, System& system);
 void readDihedrals(ifstream& file, System& system);
 void readImpropers(ifstream& file, System& system);
+void countmolen(System& system);
 void readLammpsData(const string& dataFileName, System& system);
 

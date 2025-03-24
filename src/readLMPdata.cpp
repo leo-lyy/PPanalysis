@@ -196,6 +196,12 @@ void readImpropers(ifstream& file, System& system)
     }
 }
 
+void countmolen(System& system)
+{
+    system.molen.resize(system.molnumMAX+1);
+    fill(system.molen.begin(), system.molen.end(), 0);
+    for (long int i = 0; i < system.num_atoms; i++)system.molen[system.atoms[i].mol]++;
+}
 void readLammpsData(const string& dataFileName, System& system)
 {
     auto start = std::chrono::high_resolution_clock::now();// 记录读取开始的时间
@@ -245,6 +251,6 @@ void readLammpsData(const string& dataFileName, System& system)
     cout << "Elapsed time for reading Data file: " << elapsed.count() << " s" << endl;
     
     unwrap(system);    // unwrap the box for data file
-    // countmolen(system);
+    countmolen(system);
 
 }

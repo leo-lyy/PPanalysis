@@ -11,23 +11,74 @@
 #include"../include/system.h"
 #include"../include/readLMPdata.h"
 #include"../include/readLMPdump.h"
-#include"../include/p2calculation.h"
+#include"../include/p2_calculation.h"
 #include"../include/functions.h"
+#include"../include/profileV_calculation.h"
+#include"../include/helix_calculation.h"
 
 using namespace std;
 void showMenu()
 {
     // ╝╚╔ ╗ ∥ =
-    cout << "======= LAMMPS Trajectory Analysis Program for Polypropylene ========" << endl;
-    cout << "|  Make sure the data file are written in the LAMMPS data format    |" << endl;
-    cout << "|  through **write_data xxx.data nocoeff**, and the dump file is    |" << endl;
-    cout << "|  written in the format of 'id mol type x y z ix iy iz vx vy vz'   |" << endl;
-    cout << "=====================================================================" << endl;
-    cout << "1. Calculate the orientarion order parameter P2;" << endl;
-    cout << "2. Calculate the number of helix structure (crystall degree);" << endl;
-    cout << "3. Calculate the velocity profile in z direction;" << endl;
-    cout << "0. Exit" << endl;
-    cout << "Please choose the analysis type: ";
+/*
++----------------------------------------------------------------+
+|             _                                                  |
+|       __   | |           __                                    |
+|      | _|  | |          |_ |                                   |
+|      | |   | |           | |                                   |
+|      | |   | |           | |                                   |
+|      | |   | |           | | __                                |
+|      | |   | |           | |/ /                                |
+|      | |  /   \          | / /                                 |
+|      | | / / \ \         |/ /    LAMMPS Trajectory Analysis    |
+|      | |/ /   \ \        / /                                   |
+|      | / /     \ \      / /|     Program for Polypropylene     |
+|      |/ /       \ \    / / |                                   |
+|      / /         \ \  / /| |   _ ___                           |
+|     / /|          \ \/ / | |  | `___ \                         |
+|    / / |           \__/  | |  | |   | |                        |
+|   /_/| |                 | |  | |   | |                        |
+|      |__|               |__|  | |   |__|                       |
+|                                                                |
+|================================================================|
+| Make sure the data file are written in the LAMMPS data format  |
+| through **write_data xxx.data nocoeff**, and the dump file is  |
+| written in the format of 'id mol type x y z ix iy iz vx vy vz' |
++----------------------------------------------------------------+
+ */ 
+    cout << "+----------------------------------------------------------------+" << endl;
+    cout << "|             _                                                  |" << endl;
+    cout << "|       __   | |           __                                    |" << endl;
+    cout << "|      | _|  | |          |_ |                                   |" << endl;
+    cout << "|      | |   | |           | |                                   |" << endl;
+    // cout << "|      | |   | |           | |                                   |" << endl;
+    cout << "|      | |   | |           | | __                                |" << endl;
+    cout << "|      | |   | |           | |/ /                                |" << endl;
+    cout << "|      | |  /   \\          | / /                                 |" << endl;
+    cout << "|      | | / / \\ \\         |/ /    LAMMPS Trajectory Analysis    |" << endl;
+    cout << "|      | |/ /   \\ \\        / /                                   |" << endl;
+    cout << "|      | / /     \\ \\      / /|     Program for Polypropylene     |" << endl;
+    cout << "|      |/ /       \\ \\    / / |                                   |" << endl;
+    cout << "|      / /         \\ \\  / /| |   _ ___                           |" << endl;
+    cout << "|     / /|          \\ \\/ / | |  | `___ \\                         |" << endl;
+    cout << "|    / / |           \\__/  | |  | |   | |                        |" << endl;
+    cout << "|   /_/| |                 | |  | |   | |                        |" << endl;
+    cout << "|      |__|               |__|  | |   |__|                       |" << endl;
+    cout << "|                                                                |" << endl;
+    cout << "|================================================================|" << endl;
+    cout << "| Make sure the data file are written in the LAMMPS data format  |" << endl;
+    cout << "| through **write_data xxx.data nocoeff**, and the dump file is  |" << endl;
+    cout << "| written in the format of 'id mol type x y z ix iy iz vx vy vz' |" << endl;
+    cout << "+----------------------------------------------------------------+" << endl;
+
+    // Print the menu options
+    cout << "  [1] Calculate the orientarion order parameter P2;                " << endl;
+    cout << "  [2] Calculate the number of helix structure (crystall degree);   " << endl;
+    cout << "  [3] Calculate the velocity profile in z direction;               " << endl;
+    cout << "                                                                  " << endl;
+    cout << "  [0] Exit                                                         " << endl;
+    cout << "------------------------------------------------------------------" << endl;
+    cout << "Please choose the analysis type:                                   " << endl;
 }
 
 
@@ -71,12 +122,26 @@ int main()
                 cout << "Calculating the P2 ..." << endl;
                 ifstream dumpFilein(dumpFileName);
                 dumpIO_p2(system, dumpFilein);
-                cout << "Done!" << endl;
+                cout << endl << "Done!" << endl;
                 return 0;
             }
             case 2: // Calculate the number of helix structure (crstall degree)
             {
-                cout << "Developing ..." << endl;
+                // cout << "Developing ..." << endl;
+                cout << "Please input the data file name: ";
+                cin >> dataFileName;
+                cout << "Please input the dump file name: ";
+                cin >> dumpFileName;
+                cout << "Reading files ..." << endl;
+                readLammpsData(dataFileName, system);
+                cout << "Counting the number of frames in the dump file ..." << endl;
+                system.frames = countDumpFrame(dumpFileName);
+                cout << "The dump file contains " << system.frames << " frames." << endl;
+                cout << "Calculating the number of helix beads..." << endl;
+                ifstream dumpFilein(dumpFileName);
+                ofstream dumpFileout(dumpFileName.substr(0, dumpFileName.find_last_of(".")) + "_crystal.dump");
+                dumpIO_helix(system, dumpFilein, dumpFileout);
+                cout << endl << "Done!" << endl;
                 return 0;
             }
             case 3: // Calculate the velocity profile in z direction
@@ -96,10 +161,10 @@ int main()
                 cout << "Counting the number of frames in the dump file ..." << endl;
                 system.frames = countDumpFrame(dumpFileName);
                 cout << "The dump file contains " << system.frames << " frames." << endl;
-                cout << "Calculating the P2 ..." << endl;
+                // cout << "Calculating the P2 ..." << endl;
                 ifstream dumpFilein(dumpFileName);
                 Profile_velocity(system, dumpFilein, zlol, zhil, nslice);
-                cout << "Done!" << endl;
+                cout << endl << "Done!" << endl;
 
 
                 return 0;
