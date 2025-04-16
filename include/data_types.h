@@ -14,13 +14,15 @@ struct Atom{
     int ix, iy, iz;
     double vx, vy, vz;
     bool crystal;
+    double mass;
     
     Atom()
     : id(0), mol(0), type(0),
      x(0), y(0), z(0),
      ix(0), iy(0), iz(0),
      vx(0), vy(0), vz(0),
-     crystal(false)
+     crystal(false),
+     mass(0)
     {}
 
 };

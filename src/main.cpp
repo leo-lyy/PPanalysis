@@ -15,6 +15,7 @@
 #include"../include/functions.h"
 #include"../include/profileV_calculation.h"
 #include"../include/helix_calculation.h"
+#include"../include/rg_calculation.h"
 
 using namespace std;
 void showMenu()
@@ -75,7 +76,8 @@ void showMenu()
     cout << "  [1] Calculate the orientarion order parameter P2;                " << endl;
     cout << "  [2] Calculate the number of helix structure (crystall degree);   " << endl;
     cout << "  [3] Calculate the velocity profile in z direction;               " << endl;
-    cout << "                                                                  " << endl;
+    cout << "  [4] Calculate the radius of gyration;                            " << endl;
+    cout << "                                                                   " << endl;
     cout << "  [0] Exit                                                         " << endl;
     cout << "------------------------------------------------------------------" << endl;
     cout << "Please choose the analysis type:                                   " << endl;
@@ -167,6 +169,27 @@ int main()
                 cout << endl << "Done!" << endl;
 
 
+                return 0;
+            }
+            case 4: // Calculate the radius of gyration
+            {
+                cout << "Please input the data file name: ";
+                cin >> dataFileName;
+                cout << "Please input the dump file name: ";
+                cin >> dumpFileName;
+                int tarchain, endchain;
+                cout << "Please enter the start and the end chain number to calculate the Mean Square Radious of Gyration:"<<endl;
+                cin >> tarchain >> endchain;
+                cout << "Reading files ..." << endl;
+                readLammpsData(dataFileName, system);
+                cout << "Counting the number of frames in the dump file ..." << endl;
+                system.frames = countDumpFrame(dumpFileName);
+                cout << "The dump file contains " << system.frames << " frames." << endl;
+                cout << "Calculating the radius of gyration ..." << endl;
+                ifstream dumpFilein(dumpFileName);
+                dumpIO_Rg(system, dumpFilein, tarchain, endchain);
+                // dumpFilein.close();
+                cout << endl << "Done!" << endl;
                 return 0;
             }
             
