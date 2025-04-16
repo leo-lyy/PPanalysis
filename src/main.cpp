@@ -20,7 +20,6 @@
 using namespace std;
 void showMenu()
 {
-    // ╝╚╔ ╗ ∥ =
 /*
 +----------------------------------------------------------------+
 |             _                                                  |
@@ -86,8 +85,34 @@ void showMenu()
 
 // 清理输入缓冲区
 void clearInputBuffer() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+class FileError : public std::runtime_error {
+    public:
+        explicit FileError(const std::string& message) 
+            : std::runtime_error(message) {}
+    };
+// Function to process file with error checking
+void processFile(const string& filename) {
+    ifstream inputFile(filename);
+    
+    try {
+        // Check if file opened successfully
+        if (!inputFile.is_open()) {
+            throw FileError("Failed to open file: " + filename);
+        }
+        
+        // Check if file is empty
+        if (inputFile.peek() == ifstream::traits_type::eof()) {
+            throw FileError("File is empty: " + filename);
+        }
+        // cout << "File processed successfully!" << endl;
+    }
+    catch (const FileError& e) {
+        cerr << "Error: " << e.what() << endl;
+        throw; // Re-throw to let caller handle if needed
+    }
 }
 int main()
 {
@@ -114,9 +139,11 @@ int main()
             {
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
+                processFile(dataFileName);
                 cout << "Please input the dump file name: ";
                 cin >> dumpFileName;
-                cout << "Reading files ..." << endl;
+                processFile(dumpFileName);
+                cout << "Reading data files ..." << endl;
                 readLammpsData(dataFileName, system);
                 cout << "Counting the number of frames in the dump file ..." << endl;
                 system.frames = countDumpFrame(dumpFileName);
@@ -129,12 +156,13 @@ int main()
             }
             case 2: // Calculate the number of helix structure (crstall degree)
             {
-                // cout << "Developing ..." << endl;
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
+                processFile(dataFileName);
                 cout << "Please input the dump file name: ";
                 cin >> dumpFileName;
-                cout << "Reading files ..." << endl;
+                processFile(dumpFileName);
+                cout << "Reading data files ..." << endl;
                 readLammpsData(dataFileName, system);
                 cout << "Counting the number of frames in the dump file ..." << endl;
                 system.frames = countDumpFrame(dumpFileName);
@@ -150,9 +178,11 @@ int main()
             {
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
+                processFile(dataFileName);
                 cout << "Please input the dump file name: ";
                 cin >> dumpFileName;
-                cout << "Reading files ..." << endl;
+                processFile(dumpFileName);
+                cout << "Reading data files ..." << endl;
                 readLammpsData(dataFileName, system);
                 
                 double zlol, zhil;
