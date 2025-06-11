@@ -14,8 +14,8 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
     double slicelen;  // the length of each slice
     slicelen = (double)(zhil - zlol) / nslice;
     int k;
-    pvout << "TIMESTEP" << "      ";
-    for(int i=0; i<nslice; i++) pvout << "SLICE_" << i << "      ";
+    // pvout << "TIMESTEP" << "      ";
+    // for(int i=0; i<nslice; i++) pvout << "SLICE_" << i << "      ";
     pvout << endl;
     while (f < system.frames)
     {
