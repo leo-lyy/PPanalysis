@@ -11,4 +11,4 @@
 
 using namespace std;
 
-void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double zhil, int nslice);
+void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double zhil, int nslice, int mode);

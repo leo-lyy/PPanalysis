@@ -3,11 +3,24 @@
 
 using namespace std;
 
-void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double zhil, int nslice)
+void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double zhil, int nslice, int mode)
 {
     string line;
     istringstream ss(line);
-    ofstream pvout("Profile_velocity.txt");
+    ofstream pvout;
+    if (mode == 0)
+    {
+        pvout.open("Profile_velocity.txt");
+    }
+    else if (mode == 1)
+    {
+        pvout.open("Profile_delta_displacement.txt");
+    }
+    else
+    {
+        cerr << "Error: mode should be 0 or 1." << endl;
+        return;
+    }
     long int f = 0;
     vector <double> zslicev(nslice, 0);
     vector <int> sn(nslice, 0);
@@ -16,7 +29,6 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
     int k;
     // pvout << "TIMESTEP" << "      ";
     // for(int i=0; i<nslice; i++) pvout << "SLICE_" << i << "      ";
-    pvout << endl;
     while (f < system.frames)
     {
         // long int iderr = 0;
@@ -38,30 +50,36 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
         }
         for (long int i = 0; i < system.num_atoms; i++)
         {
-
             getline(dumpFilein, line);
             istringstream ss(line);
             ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz;
             id--;  // the atom id in dump file starts from 1
-            // system.atoms[id].x = x;
-            // system.atoms[id].y = y;
-            // system.atoms[id].z = z;
-            // system.atoms[id].mol = mol;
-            // system.atoms[id].type = type;
-            // system.atoms[id].ix = ix;
-            // system.atoms[id].iy = iy;
-            // system.atoms[id].iz = iz;
-            // system.atoms[id].vx = vx;
-            // system.atoms[id].vy = vy;
-            // system.atoms[id].vz = vz;
+            if (mode == 1 && f != 1)  // calculate the displacement profile
+            {
+                vx = x + ix * system.bx - system.atoms[id].x;
+                vy = y + iy * system.by - system.atoms[id].y;
+                vz = z + iz * system.bz - system.atoms[id].z;
+            }
             if (z >= zlol && z <= zhil)
             {
                 k = floor((z - zlol) / slicelen);
                 zslicev[k] += vy;
                 sn[k]++;
             }
-            
+            // store the current frame atom data
+            system.atoms[id].x = x;
+            system.atoms[id].y = y;
+            system.atoms[id].z = z;
+            system.atoms[id].mol = mol;
+            system.atoms[id].type = type;
+            system.atoms[id].ix = ix;
+            system.atoms[id].iy = iy;
+            system.atoms[id].iz = iz;
+            system.atoms[id].vx = vx;
+            system.atoms[id].vy = vy;
+            system.atoms[id].vz = vz;
         }
+        unwrap(system);  // wrap the atom position to the original box
         for(int c=0; c < nslice; c++)
         {
             zslicev[c] /= sn[c];

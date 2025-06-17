@@ -75,9 +75,10 @@ void showMenu()
     // Print the menu options
     cout << "  [1] Calculate the orientarion order parameter P2;                " << endl;
     cout << "  [2] Calculate the number of helix structure (crystall degree);   " << endl;
-    cout << "  [3] Calculate the velocity profile in z direction;               " << endl;
-    cout << "  [4] Calculate the radius of gyration;                            " << endl;
-    cout << "  [5] Calculate the <end to end distance>;                           " << endl;
+    cout << "  [3] Calculate the velocity profile in z direction(velocity);     " << endl;
+    cout << "  [4] Calculate the velocity profile in z direction(displacement); " << endl;
+    cout << "  [5] Calculate the radius of gyration;                            " << endl;
+    cout << "  [6] Calculate the <end to end distance>;                           " << endl;
     cout << "                                                                   " << endl;
     cout << "  [0] Exit                                                         " << endl;
     cout << "------------------------------------------------------------------" << endl;
@@ -176,8 +177,9 @@ int main()
                 cout << endl << "Done!" << endl;
                 return 0;
             }
-            case 3: // Calculate the velocity profile in z direction
+            case 3: // Calculate the velocity profile in z direction(read the real instant velocity)
             {
+                int mode = 0; // 0 for velocity, 1 for displacement
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
                 processFile(dataFileName);
@@ -197,13 +199,40 @@ int main()
                 cout << "The dump file contains " << system.frames << " frames." << endl;
                 // cout << "Calculating the P2 ..." << endl;
                 ifstream dumpFilein(dumpFileName);
-                Profile_velocity(system, dumpFilein, zlol, zhil, nslice);
+                Profile_velocity(system, dumpFilein, zlol, zhil, nslice, mode);
                 cout << endl << "Done!" << endl;
 
 
                 return 0;
             }
-            case 4: // Calculate the radius of gyration
+            case 4: // Calculate the velocity profile in z direction(calculate the velocity from displacement)
+            {
+                int mode = 1; // 0 for velocity, 1 for displacement
+                cout << "Please input the data file name: ";
+                cin >> dataFileName;
+                processFile(dataFileName);
+                cout << "Please input the dump file name: ";
+                cin >> dumpFileName;
+                processFile(dumpFileName);
+                cout << "Reading data files ..." << endl;
+                readLammpsData(dataFileName, system);
+                
+                double zlol, zhil;
+                int nslice;
+                cout << endl << "Please enter Z_low_limit, Z_high_limit and n_slice to analyse the velocity:"<<endl;
+                cin >> zlol >> zhil >> nslice;
+
+                cout << "Counting the number of frames in the dump file ..." << endl;
+                system.frames = countDumpFrame(dumpFileName);
+                cout << "The dump file contains " << system.frames << " frames." << endl;
+                // cout << "Calculating the P2 ..." << endl;
+                ifstream dumpFilein(dumpFileName);
+                Profile_velocity(system, dumpFilein, zlol, zhil, nslice, mode);
+                cout << endl << "Done!" << endl;
+
+                return 0;
+            }
+            case 5: // Calculate the radius of gyration
             {
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
@@ -224,7 +253,7 @@ int main()
                 cout << endl << "Done!" << endl;
                 return 0;
             }
-            case 5: // Calculate the end to end distance
+            case 6: // Calculate the end to end distance
             {
                 cout << "Please input the data file name: ";
                 cin >> dataFileName;
