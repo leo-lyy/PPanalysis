@@ -2,22 +2,102 @@
 
 using namespace std;
 
+// // Function to compute the inverse of a 3x3 matrix
+// std::array<std::array<double, 3>, 3> inverse_3x3(const std::array<std::array<double, 3>, 3>& matrix) {
+//     // Initialize output matrix
+//     std::array<std::array<double, 3>, 3> inv_matrix{};
+
+//     // Compute determinant
+//     double det = matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+//                - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+//                + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+
+//     // Check for singular matrix
+//     if (std::abs(det) < 1e-10) {
+//         throw std::runtime_error("Matrix is singular (determinant is zero or near-zero)");
+//     }
+
+//     // Compute inverse: adjugate matrix divided by determinant
+//     double inv_det = 1.0 / det;
+
+//     // Cofactor matrix elements
+//     inv_matrix[0][0] = (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) * inv_det;
+//     inv_matrix[0][1] = -(matrix[0][1] * matrix[2][2] - matrix[0][2] * matrix[2][1]) * inv_det;
+//     inv_matrix[0][2] = (matrix[0][1] * matrix[1][2] - matrix[0][2] * matrix[1][1]) * inv_det;
+    
+//     inv_matrix[1][0] = -(matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) * inv_det;
+//     inv_matrix[1][1] = (matrix[0][0] * matrix[2][2] - matrix[0][2] * matrix[2][0]) * inv_det;
+//     inv_matrix[1][2] = -(matrix[0][0] * matrix[1][2] - matrix[0][2] * matrix[1][0]) * inv_det;
+    
+//     inv_matrix[2][0] = (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]) * inv_det;
+//     inv_matrix[2][1] = -(matrix[0][0] * matrix[2][1] - matrix[0][1] * matrix[2][0]) * inv_det;
+//     inv_matrix[2][2] = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]) * inv_det;
+
+//     return inv_matrix;
+// }
+
 void unwrap(System& system)
 {
-    for( long int i = 0; i < system.num_atoms; i++)
+    if (system.box_type == 0) // orthogonal box
     {
-        system.atoms[i].x = system.atoms[i].x + system.atoms[i].ix * system.bx;
-        system.atoms[i].y = system.atoms[i].y + system.atoms[i].iy * system.by;
-        system.atoms[i].z = system.atoms[i].z + system.atoms[i].iz * system.bz;
+        for( long int i = 0; i < system.num_atoms; i++)
+        {
+            system.atoms[i].x = system.atoms[i].x + system.atoms[i].ix * system.bx;
+            system.atoms[i].y = system.atoms[i].y + system.atoms[i].iy * system.by;
+            system.atoms[i].z = system.atoms[i].z + system.atoms[i].iz * system.bz;
+        }
+    }
+    else if (system.box_type == 1) // triclinic box
+    {
+        for( long int i = 0; i < system.num_atoms; i++)
+        {
+            double H[3][3];
+            H[0][0] = system.bx;
+            H[0][1] = system.xtilt;
+            H[0][2] = system.ytilt;
+            H[1][0] = 0.0;
+            H[1][1] = system.by;
+            H[1][2] = system.ztilt;
+            H[2][0] = 0.0;
+            H[2][1] = 0.0;
+            H[2][2] = system.bz;
+            system.atoms[i].x = system.atoms[i].x + system.atoms[i].ix * H[0][0] + system.atoms[i].iy * H[0][1] + system.atoms[i].iz * H[0][2];
+            system.atoms[i].y = system.atoms[i].y + system.atoms[i].ix * H[1][0] + system.atoms[i].iy * H[1][1] + system.atoms[i].iz * H[1][2];
+            system.atoms[i].z = system.atoms[i].z + system.atoms[i].ix * H[2][0] + system.atoms[i].iy * H[2][1] + system.atoms[i].iz * H[2][2];
+        }
     }
 }
 void wrap(System& system)
 {
-    for( long int i = 0; i < system.num_atoms; i++)
+    if (system.box_type == 0) // orthogonal box
     {
-        system.atoms[i].x = system.atoms[i].x - system.atoms[i].ix * system.bx;
-        system.atoms[i].y = system.atoms[i].y - system.atoms[i].iy * system.by;
-        system.atoms[i].z = system.atoms[i].z - system.atoms[i].iz * system.bz;
+        for( long int i = 0; i < system.num_atoms; i++)
+        {
+            system.atoms[i].x = fmod(system.atoms[i].x, system.bx);
+            system.atoms[i].y = fmod(system.atoms[i].y, system.by);
+            system.atoms[i].z = fmod(system.atoms[i].z, system.bz);
+        }
+    }
+    else if (system.box_type == 1) // triclinic box
+    {
+        for( long int i = 0; i < system.num_atoms; i++)
+        {
+            double H[3][3];
+            H[0][0] = system.bx;
+            H[0][1] = system.xtilt;
+            H[0][2] = system.ytilt;
+            H[1][0] = 0.0;
+            H[1][1] = system.by;
+            H[1][2] = system.ztilt;
+            H[2][0] = 0.0;
+            H[2][1] = 0.0;
+            H[2][2] = system.bz;
+            // double invH[3][3];
+            // invH = inverse_3x3(H);
+            system.atoms[i].x = system.atoms[i].x - H[0][0] * system.atoms[i].ix;
+            system.atoms[i].y = system.atoms[i].y - H[1][1] * system.atoms[i].iy;
+            system.atoms[i].z = system.atoms[i].z - H[2][2] * system.atoms[i].iz;
+        }
     }
 }
 

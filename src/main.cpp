@@ -39,7 +39,7 @@ void showMenu()
 |     / /|          \ \/ / | |  | `___ \                         |
 |    / / |           \__/  | |  | |   | |                        |
 |   /_/| |                 | |  | |   | |                        |
-|      |__|               |__|  | |   |__|                       |
+|      |__|               |__|  |_|   |__|                       |
 |                                                                |
 |================================================================|
 | Make sure the data file are written in the LAMMPS data format  |
@@ -64,7 +64,7 @@ void showMenu()
     cout << "|     / /|          \\ \\/ / | |  | `___ \\                         |" << endl;
     cout << "|    / / |           \\__/  | |  | |   | |                        |" << endl;
     cout << "|   /_/| |                 | |  | |   | |                        |" << endl;
-    cout << "|      |__|               |__|  | |   |__|                       |" << endl;
+    cout << "|      |__|               |__|  |_|   |__|                       |" << endl;
     cout << "|                                                                |" << endl;
     cout << "|================================================================|" << endl;
     cout << "| Make sure the data file are written in the LAMMPS data format  |" << endl;
@@ -76,7 +76,7 @@ void showMenu()
     cout << "  [1] Calculate the orientarion order parameter P2;                " << endl;
     cout << "  [2] Calculate the number of helix structure (crystall degree);   " << endl;
     cout << "  [3] Calculate the velocity profile in z direction(velocity);     " << endl;
-    cout << "  [4] Calculate the velocity profile in z direction(displacement); " << endl;
+    cout << "  [4] Calculate the velocity profile in z direction(displacement) [not compatable for non-orthogonal box]; " << endl;
     cout << "  [5] Calculate the radius of gyration;                            " << endl;
     cout << "  [6] Calculate the <end to end distance>;                           " << endl;
     cout << "                                                                   " << endl;

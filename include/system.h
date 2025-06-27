@@ -12,6 +12,8 @@ struct System{
     vector<Improper> impropers;
     double xlo, xhi, ylo, yhi, zlo, zhi;
     double bx, by, bz;
+    int box_type = 0; // 0: orthogonal, 1: triclinic
+    double xtilt, ytilt, ztilt; // triclinic box tilt factors
     vector<double> mass;
     long int molnumMAX = -1;
     vector<long int> molen;

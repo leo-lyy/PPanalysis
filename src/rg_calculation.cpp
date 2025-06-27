@@ -51,12 +51,27 @@ void dumpIO_Rg(System& system, ifstream& dumpFilein, int tarchain, int endchain)
             }
             else if (line == "ITEM: BOX BOUNDS pp pp pp")
             {
+                system.box_type = 0; // orthogonal box
                 getline(dumpFilein, line);
                 ss >> system.xlo >> system.xhi;
                 getline(dumpFilein, line);
                 ss >> system.ylo >> system.yhi;
                 getline(dumpFilein, line);
                 ss >> system.zlo >> system.zhi;
+                system.bx = system.xhi - system.xlo;
+                system.by = system.yhi - system.ylo;
+                system.bz = system.zhi - system.zlo;
+                k += 3;
+            }
+            else if (line == "ITEM: BOX BOUNDS xy xz yz pp pp pp")
+            {
+                system.box_type = 1; // triclinic box
+                getline(dumpFilein, line);
+                ss >> system.xlo >> system.xhi >> system.xtilt;
+                getline(dumpFilein, line);
+                ss >> system.ylo >> system.yhi >> system.ytilt;
+                getline(dumpFilein, line);
+                ss >> system.zlo >> system.zhi >> system.ztilt;
                 system.bx = system.xhi - system.xlo;
                 system.by = system.yhi - system.ylo;
                 system.bz = system.zhi - system.zlo;

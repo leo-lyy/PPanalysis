@@ -202,8 +202,17 @@ void countmolen(System& system)
     fill(system.molen.begin(), system.molen.end(), 0);
     for (long int i = 0; i < system.num_atoms; i++)system.molen[system.atoms[i].mol]++;
 }
+bool fileExists(const std::string& filename) {
+    return std::filesystem::exists(filename);
+}
 void readLammpsData(const string& dataFileName, System& system)
 {
+    // check if the file exists
+    if (!fileExists(dataFileName)) 
+    {
+        cout << "data file does not exist!" << endl;
+    }
+
     auto start = std::chrono::high_resolution_clock::now();// 记录读取开始的时间
     ifstream file(dataFileName);
     string line;

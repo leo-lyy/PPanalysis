@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <stdexcept>
+#include <filesystem>
 
 #include "system.h"
 #include "data_types.h"
@@ -23,5 +25,6 @@ void readAngles(ifstream& file, System& system);
 void readDihedrals(ifstream& file, System& system);
 void readImpropers(ifstream& file, System& system);
 void countmolen(System& system);
+bool fileExists(const std::string& filename);
 void readLammpsData(const string& dataFileName, System& system);
 

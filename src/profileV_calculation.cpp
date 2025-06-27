@@ -79,7 +79,6 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
             system.atoms[id].vy = vy;
             system.atoms[id].vz = vz;
         }
-        unwrap(system);  // wrap the atom position to the original box
         for(int c=0; c < nslice; c++)
         {
             zslicev[c] /= sn[c];
