@@ -16,18 +16,19 @@ void dumpIO_Rg(System& system, ifstream& dumpFilein, int tarchain, int endchain)
     ofstream comXout("comX.txt");
     ofstream comYout("comY.txt");
     ofstream comZout("comZ.txt");
-    msrgout << "Step        ";
-    for (int ii = tarchain; ii <= endchain; ii++) msrgout << "Mol_ID" << ii << "      ";
-    msrgout << endl;
-    comXout << "Step        ";
-    for (int ii = tarchain; ii <= endchain; ii++) comXout << "Mol_ID" << ii << "      ";
-    comXout << endl;
-    comYout << "Step        ";
-    for (int ii = tarchain; ii <= endchain; ii++) comYout << "Mol_ID" << ii << "      ";
-    comYout << endl;
-    comZout << "Step        ";
-    for (int ii = tarchain; ii <= endchain; ii++) comZout << "Mol_ID" << ii << "      ";
-    comZout << endl;
+    // for better readability, we can add headers to the output files, ignore for better performance in MATLAB
+    // msrgout << "Step        ";
+    // for (int ii = tarchain; ii <= endchain; ii++) msrgout << "Mol_ID" << ii << "      ";
+    // msrgout << endl;
+    // comXout << "Step        ";
+    // for (int ii = tarchain; ii <= endchain; ii++) comXout << "Mol_ID" << ii << "      ";
+    // comXout << endl;
+    // comYout << "Step        ";
+    // for (int ii = tarchain; ii <= endchain; ii++) comYout << "Mol_ID" << ii << "      ";
+    // comYout << endl;
+    // comZout << "Step        ";
+    // for (int ii = tarchain; ii <= endchain; ii++) comZout << "Mol_ID" << ii << "      ";
+    // comZout << endl;
 
 
     long int f = 0;

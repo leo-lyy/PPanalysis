@@ -25,6 +25,6 @@ void readAngles(ifstream& file, System& system);
 void readDihedrals(ifstream& file, System& system);
 void readImpropers(ifstream& file, System& system);
 void countmolen(System& system);
-bool fileExists(const std::string& filename);
+// bool fileExists(const string& filename);
 void readLammpsData(const string& dataFileName, System& system);
 
