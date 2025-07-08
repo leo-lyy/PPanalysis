@@ -15,7 +15,7 @@ EXAMPLE_DIR = example
 BUILD_DIR = build
 
 # Flags
-CXXFLAGS = -Wall -O2 -I$(INCLUDE_DIR)
+CXXFLAGS = -Wall -O2 -std=c++17 -I$(INCLUDE_DIR)
 LDFLAGS =
 
 # Source files and target
