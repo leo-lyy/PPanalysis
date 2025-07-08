@@ -3,6 +3,7 @@
 # Compiler options
 CXX_GCC = g++
 CXX_INTEL = icpx
+CXX_AOCC = clang++
 
 # Default compiler (g++)
 CXX = $(CXX_GCC)
@@ -45,8 +46,12 @@ clean:
 intel: CXX = $(CXX_INTEL)
 intel: clean all
 
+# AMD AOCC target
+aocc: CXX = $(CXX_AOCC)
+aocc: clean all
+
 # Example building (optional)
 examples: all
 	$(CXX) $(CXXFLAGS) $(EXAMPLE_DIR)/*.cpp -o example_app $(LDFLAGS) -L. -l:$(TARGET)
 
-.PHONY: all clean intel directories examples
+.PHONY: all clean intel aocc directories examples
