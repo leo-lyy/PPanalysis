@@ -34,17 +34,14 @@ double p2calculation(System& system, long int f)
             r1.x = system.atoms[i + 9].x - system.atoms[i].x;
             r1.y = system.atoms[i + 9].y - system.atoms[i].y;
             r1.z = system.atoms[i + 9].z - system.atoms[i].z;
-            axis ovec;
-            ovec.x = 0;
-            ovec.y = 1;
-            ovec.z = 0;
+            axis ovec{0, 1, 0, 0};
             double cos_theta = dot(r1, ovec) / norm(r1);
             // cout << "cos_theta: " << cos_theta << endl;
             p2sum += (0.5 * (3 * cos_theta * cos_theta - 1));
             p2num++;
         }
     }
-    double p2 = p2sum / p2num;
+    double p2 = p2num > 0 ? p2sum / p2num : 0.0;
     printProgressP2(f, system.frames, p2);
     return p2;
 }
@@ -52,7 +49,6 @@ double p2calculation(System& system, long int f)
 void dumpIO_p2(System& system, ifstream& dumpFilein)
 {
     string line;
-    istringstream ss(line);
     ofstream p2out("P2.txt");
     long int f = 0;
     while (f < system.frames)
@@ -60,40 +56,66 @@ void dumpIO_p2(System& system, ifstream& dumpFilein)
         // long int iderr = 0;
         auto fstart = std::chrono::high_resolution_clock::now();
         f++;
-        long int id, flable;
-        int mol, type;
-        double x, y, z, vx, vy, vz;
-        long int ix, iy, iz;
-        // update the atom position and velocity
-        while (line != "ITEM: ATOMS id mol type x y z ix iy iz vx vy vz")
+        long long timestep = -1;
+        bool gotAtoms = false;
+        bool gotBox = false;
+        bool gotTimestep = false;
+        string header;
+        while (std::getline(dumpFilein, header))
         {
-            getline(dumpFilein, line);
-            // cout << line << endl;
+            if (header.rfind("ITEM: TIMESTEP", 0) == 0) {
+                if (!std::getline(dumpFilein, line)) return;
+                { istringstream iss(line); iss >> timestep; }
+                gotTimestep = true;
+            }
+            else if (header.rfind("ITEM: NUMBER OF ATOMS", 0) == 0) {
+                if (!std::getline(dumpFilein, line)) return;
+            }
+            else if (header.rfind("ITEM: BOX BOUNDS", 0) == 0) {
+                bool triclinic = header.find("xy") != string::npos;
+                system.box_type = triclinic ? 1 : 0;
+                if (!getline(dumpFilein, line)) return;
+                if (!getline(dumpFilein, line)) return;
+                if (!getline(dumpFilein, line)) return;
+                gotBox = true;
+            }
+            else if (header.rfind("ITEM: ATOMS", 0) == 0) {
+                bool hasVel = header.find("vx") != string::npos;
+                if (!hasVel) {
+                    cerr << "Error: P2 requires velocities in dump." << endl;
+                    return;
+                }
+                for (long int i = 0; i < system.num_atoms; i++) {
+                    long long id;
+                    int mol, type;
+                    double x, y, z, vx, vy, vz;
+                    int ix, iy, iz;
+                    if (!(dumpFilein >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz)) return;
+                    if (id <= 0 || id > system.num_atoms) return;
+                    size_t idx = size_t(id - 1);
+                    auto& a = system.atoms[idx];
+                    a.mol = mol;
+                    a.type = type;
+                    a.x = x;
+                    a.y = y;
+                    a.z = z;
+                    a.ix = ix;
+                    a.iy = iy;
+                    a.iz = iz;
+                    a.vx = vx;
+                    a.vy = vy;
+                    a.vz = vz;
+                }
+                gotAtoms = true;
+                std::getline(dumpFilein, line);
+                break;
+            }
+            if (gotAtoms) break;
         }
-        for (long int i = 0; i < system.num_atoms; i++)
-        {
-            getline(dumpFilein, line);
-            istringstream ss(line);
-            ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz;
-            id--;  // the atom id in dump file starts from 1
-            system.atoms[id].x = x;
-            system.atoms[id].y = y;
-            system.atoms[id].z = z;
-            system.atoms[id].mol = mol;
-            system.atoms[id].type = type;
-            system.atoms[id].ix = ix;
-            system.atoms[id].iy = iy;
-            system.atoms[id].iz = iz;
-            system.atoms[id].vx = vx;
-            system.atoms[id].vy = vy;
-            system.atoms[id].vz = vz;
-            // if (system.atoms[id].id != id + 1) iderr++;
-        }
-        // if (iderr != 0) cout << "ID error: " << iderr <<", frame:"<<f<< endl;
+        if (!(gotAtoms && gotTimestep)) break;
         unwrap(system);
-        // calculate the P2
         double p2x = p2calculation(system, f);
-        p2out << f << " " << p2x << endl;
+        p2out << f << " " << p2x << "\n";
         p2out.flush();
     }
 }

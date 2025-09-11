@@ -1,4 +1,3 @@
-
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -155,7 +154,7 @@ int main()
                 ifstream dumpFilein(dumpFileName);
                 dumpIO_p2(system, dumpFilein);
                 cout << endl << "Done!" << endl;
-                return 0;
+                break;
             }
             case 2: // Calculate the number of helix structure (crstall degree)
             {
@@ -175,7 +174,7 @@ int main()
                 ofstream dumpFileout(dumpFileName.substr(0, dumpFileName.find_last_of(".")) + "_crystal.dump");
                 dumpIO_helix(system, dumpFilein, dumpFileout);
                 cout << endl << "Done!" << endl;
-                return 0;
+                break;
             }
             case 3: // Calculate the velocity profile in z direction(read the real instant velocity)
             {
@@ -203,7 +202,7 @@ int main()
                 cout << endl << "Done!" << endl;
 
 
-                return 0;
+                break;
             }
             case 4: // Calculate the velocity profile in z direction(calculate the velocity from displacement)
             {
@@ -230,7 +229,7 @@ int main()
                 Profile_velocity(system, dumpFilein, zlol, zhil, nslice, mode);
                 cout << endl << "Done!" << endl;
 
-                return 0;
+                break;
             }
             case 5: // Calculate the radius of gyration
             {
@@ -251,7 +250,7 @@ int main()
                 dumpIO_Rg(system, dumpFilein, tarchain, endchain);
                 // dumpFilein.close();
                 cout << endl << "Done!" << endl;
-                return 0;
+                break;
             }
             case 6: // Calculate the end to end distance
             {
@@ -273,7 +272,7 @@ int main()
                 dumpIO_Ree(system, dumpFilein);
                 // dumpFilein.close();
                 cout << endl << "Done!" << endl;
-                return 0;
+                break;
             }
             
             case 0: // Exit

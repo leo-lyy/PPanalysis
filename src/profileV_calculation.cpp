@@ -1,4 +1,3 @@
-
 #include"../include/profileV_calculation.h"
 
 using namespace std;
@@ -22,10 +21,9 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
         return;
     }
     long int f = 0;
-    vector <double> zslicev(nslice, 0);
+    vector <double> zslicev(nslice, 0.0);
     vector <int> sn(nslice, 0);
-    double slicelen;  // the length of each slice
-    slicelen = (double)(zhil - zlol) / nslice;
+    double slicelen = (double)(zhil - zlol) / nslice;
     int k;
     // pvout << "TIMESTEP" << "      ";
     // for(int i=0; i<nslice; i++) pvout << "SLICE_" << i << "      ";
@@ -39,20 +37,19 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
         int mol, type;
         double x, y, z, vx, vy, vz;
         long int ix, iy, iz;
-        fill(zslicev.begin(), zslicev.end(), 0);
+        fill(zslicev.begin(), zslicev.end(), 0.0);
         fill(sn.begin(), sn.end(), 0);
 
         // update the atom position and velocity
         while (line != "ITEM: ATOMS id mol type x y z ix iy iz vx vy vz")
         {
-            getline(dumpFilein, line);
-            // cout << line << endl;
+            if (!getline(dumpFilein, line)) return;
         }
         for (long int i = 0; i < system.num_atoms; i++)
         {
-            getline(dumpFilein, line);
-            istringstream ss(line);
-            ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz;
+            if (!getline(dumpFilein, line)) return;
+            istringstream ls(line);
+            ls >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz;
             id--;  // the atom id in dump file starts from 1
             if (mode == 1 && f != 1)  // calculate the displacement profile
             {
@@ -62,9 +59,12 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
             }
             if (z >= zlol && z <= zhil)
             {
-                k = floor((z - zlol) / slicelen);
-                zslicev[k] += vy;
-                sn[k]++;
+                k = (int)floor((z - zlol) / slicelen);
+                if (k >= nslice) k = nslice - 1;
+                if (k >= 0) {
+                    zslicev[k] += vy;
+                    sn[k]++;
+                }
             }
             // store the current frame atom data
             system.atoms[id].x = x;
@@ -79,16 +79,13 @@ void Profile_velocity(System& system, ifstream& dumpFilein, double zlol, double 
             system.atoms[id].vy = vy;
             system.atoms[id].vz = vz;
         }
-        for(int c=0; c < nslice; c++)
+        pvout << f << "      ";
+        for (int c = 0; c < nslice; c++)
         {
-            zslicev[c] /= sn[c];
+            double val = sn[c] > 0 ? (zslicev[c] / sn[c]) : 0.0;
+            pvout << val << "      ";
         }
-        pvout << f <<"      ";
-        for(int c=0; c < nslice; c++)
-        {
-            pvout << zslicev[c] <<"      ";
-        }
-        pvout << endl;   
+        pvout << "\n";
         pvout.flush();
     }
 }
