@@ -36,7 +36,7 @@ void reeCalculation(System& system, long int f, ofstream& Reeout)
         if (i + 1 < system.molnumMAX + 1)
         {
             head_id += system.molen[i];
-            tail_id += system.molen[i+1];
+            tail_id = head_id + system.molen[i+1] - 3;
         }
     }
     Ree_sum.x /= system.molnumMAX;
@@ -63,16 +63,26 @@ void dumpIO_Ree(System& system, ifstream& dumpFilein)
         double x, y, z, vx, vy, vz;
         long int ix, iy, iz;
         // update the atom position and velocity
-        while (line != "ITEM: ATOMS id mol type x y z ix iy iz")
+        while (getline(dumpFilein, line))
         {
-            getline(dumpFilein, line);
-            // cout << line << endl;
+            if (line.find("ITEM: ATOMS") != string::npos)
+            {
+                break;
+            }
         }
+        bool hasVel = line.find("vx") != string::npos;
         for (long int i = 0; i < system.num_atoms; i++)
         {
             getline(dumpFilein, line);
             istringstream ss(line);
-            ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz;
+            if (hasVel)
+            {
+                ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz >> vx >> vy >> vz;
+            }
+            else
+            {
+                ss >> id >> mol >> type >> x >> y >> z >> ix >> iy >> iz;
+            }
             id--;  // the atom id in dump file starts from 1
             system.atoms[id].x = x;
             system.atoms[id].y = y;
