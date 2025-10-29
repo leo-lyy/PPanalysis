@@ -193,6 +193,7 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
     string line;
     istringstream ss(line);
     ofstream crydeg("crystal_degree.txt");
+    ofstream cryzpos("crystal_position.txt");
     long int totalFrame = system.frames;
     long int f = 0;
     while (f < totalFrame)        // read the dump file frame by frame
@@ -305,6 +306,7 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
                 << system.atoms[i].x << " " << system.atoms[i].y << " " << system.atoms[i].z << " " 
                 << system.atoms[i].ix << " " << system.atoms[i].iy << " " << system.atoms[i].iz <<" "
                 << system.atoms[i].vx << " " << system.atoms[i].vy << " " << system.atoms[i].vz << endl;
+                cryzpos << system.atoms[i].z << endl;
                 
             }
             else dumpFileout << system.atoms[i].id << " " << system.atoms[i].mol << " " << system.atoms[i].type << " " 
@@ -313,6 +315,8 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
             << system.atoms[i].vx << " " << system.atoms[i].vy << " " << system.atoms[i].vz << endl;
         }
         crydeg << f <<" "<< crystalCount << endl;
+        // cryzpos << endl;
+        cryzpos.flush();
         crydeg.flush();
         dumpFileout.flush();  // 强制刷新输出流
 
