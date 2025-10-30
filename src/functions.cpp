@@ -71,11 +71,33 @@ void wrap(System& system)
 {
     if (system.box_type == 0) // orthogonal box
     {
-        for( long int i = 0; i < system.num_atoms; i++)
+        double xlo = system.xlo;
+        double ylo = system.ylo;
+        double zlo = system.zlo;
+        double lx  = system.xhi - system.xlo;
+        double ly  = system.yhi - system.ylo;
+        double lz  = system.zhi - system.zlo;
+
+        // protect against zero-size boxes
+        if (lx <= 0.0 || ly <= 0.0 || lz <= 0.0) return;
+
+        for ( long int i = 0; i < system.num_atoms; i++)
         {
-            system.atoms[i].x = fmod(system.atoms[i].x, system.bx);
-            system.atoms[i].y = fmod(system.atoms[i].y, system.by);
-            system.atoms[i].z = fmod(system.atoms[i].z, system.bz);
+            double dx = system.atoms[i].x - xlo;
+            double dy = system.atoms[i].y - ylo;
+            double dz = system.atoms[i].z - zlo;
+
+            dx = fmod(dx, lx);
+            dy = fmod(dy, ly);
+            dz = fmod(dz, lz);
+
+            if (dx < 0.0) dx += lx;
+            if (dy < 0.0) dy += ly;
+            if (dz < 0.0) dz += lz;
+
+            system.atoms[i].x = xlo + dx;
+            system.atoms[i].y = ylo + dy;
+            system.atoms[i].z = zlo + dz;
         }
     }
     else if (system.box_type == 1) // triclinic box

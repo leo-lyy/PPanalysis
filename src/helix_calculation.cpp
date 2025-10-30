@@ -193,7 +193,9 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
     string line;
     istringstream ss(line);
     ofstream crydeg("crystal_degree.txt");
-    ofstream cryzpos("crystal_position.txt");
+    // ofstream cryzpos("crystal_position.txt");
+    ofstream outHistCryzPos("hist_crystal_zpos.txt");
+    ofstream outHistzPos("hist_zpos.txt");
     long int totalFrame = system.frames;
     long int f = 0;
     while (f < totalFrame)        // read the dump file frame by frame
@@ -205,6 +207,8 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
         int mol, type;
         double x, y, z, vx, vy, vz;
         long int ix, iy, iz;
+        vector<double> zPos;    //store the z position of atoms
+        vector<double> cryzPos; //store the z position of crystal atoms
         for (long int k = 0; k < 9; k++)
         {
             getline(dumpFilein, line);
@@ -299,6 +303,8 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
         long int crystalCount = 0;
         for (long int i = 0; i < system.num_atoms; i++)
         {
+            // store all iPP atom z positions 
+            if (system.atoms[i].type != 4) zPos.push_back(system.atoms[i].z);
             if (system.atoms[i].crystal) 
             {
                 crystalCount++;
@@ -306,7 +312,8 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
                 << system.atoms[i].x << " " << system.atoms[i].y << " " << system.atoms[i].z << " " 
                 << system.atoms[i].ix << " " << system.atoms[i].iy << " " << system.atoms[i].iz <<" "
                 << system.atoms[i].vx << " " << system.atoms[i].vy << " " << system.atoms[i].vz << endl;
-                cryzpos << system.atoms[i].z << endl;
+                // cryzpos << system.atoms[i].z << endl;
+                cryzPos.push_back(system.atoms[i].z);   // store crystal iPP atoms z positions
                 
             }
             else dumpFileout << system.atoms[i].id << " " << system.atoms[i].mol << " " << system.atoms[i].type << " " 
@@ -315,8 +322,47 @@ void dumpIO_helix(System& system, ifstream& dumpFilein, ofstream& dumpFileout)
             << system.atoms[i].vx << " " << system.atoms[i].vy << " " << system.atoms[i].vz << endl;
         }
         crydeg << f <<" "<< crystalCount << endl;
-        // cryzpos << endl;
-        cryzpos.flush();
+        // make a histogram of zPos and cryzPos, with each bin width close to 1.0 (the number of bins = box length in z direction)
+        int numBins = static_cast<int>(system.bz) + 1;
+        vector<int> histZPos(numBins, 0);
+        vector<int> histCryZPos(numBins, 0);
+        for (double zval : zPos)
+        {
+            // consider the box limit is below 0, so the zpos should be shifted by the zlo of the box
+            int binIndex = static_cast<int>(zval - system.zlo);
+            if (binIndex >= 0 && binIndex < numBins)
+            {
+                histZPos[binIndex]++;
+            }
+        }
+        for (double cryzval : cryzPos)
+        {
+            int binIndex = static_cast<int>(cryzval - system.zlo);
+            if (binIndex >= 0 && binIndex < numBins)
+            {
+                histCryZPos[binIndex]++;
+            }
+        }
+        // output the histogram data to files, the first line is bin centers, the rest lines are counts for each frame
+        if (f == 1)
+        {
+            for (int b = 0; b < numBins; b++)
+            {
+                double binCenter = b + 0.5;
+                outHistzPos << binCenter << " ";
+                outHistCryzPos << binCenter << " ";
+            }
+            outHistzPos << endl;
+            outHistCryzPos << endl;
+        }
+        for (int b = 0; b < numBins; b++)
+        {
+            outHistzPos << histZPos[b] << " ";
+            outHistCryzPos << histCryZPos[b] << " ";
+        }
+        outHistzPos << endl;
+        outHistCryzPos << endl;
+
         crydeg.flush();
         dumpFileout.flush();  // 强制刷新输出流
 
