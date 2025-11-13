@@ -171,7 +171,7 @@ void helixCalculation(System& system)
         for (long int j = 0; j < helixlen; j++)
         {
             // hout << helixNeighbor[i][j] <<"    ";
-            if(helixNeighbor[i][j] >= 2)
+            if(helixNeighbor[i][j] > 2)
             {
                 // system.atoms[rh[i][j].id - 1].crystal = true;
                 // system.atoms[rh[i][j].id + 3 - 1].crystal = true;
