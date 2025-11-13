@@ -8,6 +8,8 @@
 #include<cmath>
 #include<algorithm>
 #include<stdexcept>
+#include<map>
+#include<functional>
 #include"system.h"
 #include"functions.h"
 

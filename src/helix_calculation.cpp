@@ -129,6 +129,11 @@ void helixCalculation(System& system)
     // cout << endl << "Done!" << endl;
     //////////// Searching the neighbour helix/////////////
     cout <<endl<< "Search the neighbouring helix..." << endl;
+    
+    // Build adjacency list for helix neighbors
+    // Map from (molid, helixid) to list of neighboring (molid, helixid) pairs
+    map<pair<long int, long int>, vector<pair<long int, long int>>> helixAdjacency;
+    
     // 四层嵌套循环，外两层循环链A及其螺旋，内两层循环链B及其螺旋，搜索AB之间的相邻螺旋
     for(long int i = 1; i <= system.molnumMAX; i++)
     {
@@ -156,22 +161,103 @@ void helixCalculation(System& system)
                         double rxz = sqrt(drx * drx + drz * drz);
                         if ((1.4 * sigma < rxz && rxz < 1.9 * sigma) && fabs(dry) < p / 2)
                         {
-                            // This is a crystal
+                            // This is a crystal - record the adjacency
                             helixNeighbor[i][j]++;
                             helixNeighbor[ii][jj]++;
+                            // Build adjacency list
+                            helixAdjacency[make_pair(i, j)].push_back(make_pair(ii, jj));
+                            helixAdjacency[make_pair(ii, jj)].push_back(make_pair(i, j));
                         }
                     }
                 }
             }
         }
     }
+    
+    cout << endl << "Building helix clusters using Union-Find..." << endl;
+    
+    // Union-Find data structure to find connected components
+    map<pair<long int, long int>, pair<long int, long int>> parent;
+    map<pair<long int, long int>, long int> clusterSize;
+    
+    // Initialize parent pointers
+    for(long int i = 1; i <= system.molnumMAX; i++)
+    {
+        long int helixlen = helixNum[i];
+        for (long int j = 1; j <= helixlen; j++)
+        {
+            if (bh[i][j].x == -1 || bh[i][j].y == -1 || bh[i][j].z == -1 || bh[i][j].x * bh[i][j].y * bh[i][j].z == 0) continue;
+            if (helixNeighbor[i][j] > 0)  // Only consider helices with at least one neighbor
+            {
+                pair<long int, long int> key = make_pair(i, j);
+                parent[key] = key;  // Each helix is its own parent initially
+                clusterSize[key] = 1;
+            }
+        }
+    }
+    
+    // Find function with path compression
+    function<pair<long int, long int>(pair<long int, long int>)> find = [&](pair<long int, long int> x) -> pair<long int, long int> {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);  // Path compression
+        return parent[x];
+    };
+    
+    // Union function with size tracking
+    auto unionSets = [&](pair<long int, long int> x, pair<long int, long int> y) {
+        pair<long int, long int> rootX = find(x);
+        pair<long int, long int> rootY = find(y);
+        if (rootX != rootY) {
+            // Merge smaller tree into larger tree
+            if (clusterSize[rootX] < clusterSize[rootY]) {
+                parent[rootX] = rootY;
+                clusterSize[rootY] += clusterSize[rootX];
+            } else {
+                parent[rootY] = rootX;
+                clusterSize[rootX] += clusterSize[rootY];
+            }
+        }
+    };
+    
+    // Unite all connected helices
+    for (const auto& entry : helixAdjacency)
+    {
+        pair<long int, long int> helix1 = entry.first;
+        for (const auto& helix2 : entry.second)
+        {
+            unionSets(helix1, helix2);
+        }
+    }
+    
+    // Calculate cluster sizes for each helix
+    map<pair<long int, long int>, long int> helixClusterSize;
+    for(long int i = 1; i <= system.molnumMAX; i++)
+    {
+        long int helixlen = helixNum[i];
+        for (long int j = 1; j <= helixlen; j++)
+        {
+            if (bh[i][j].x == -1 || bh[i][j].y == -1 || bh[i][j].z == -1 || bh[i][j].x * bh[i][j].y * bh[i][j].z == 0) continue;
+            if (helixNeighbor[i][j] > 0)
+            {
+                pair<long int, long int> key = make_pair(i, j);
+                pair<long int, long int> root = find(key);
+                helixClusterSize[key] = clusterSize[root];
+            }
+        }
+    }
+    
+    cout << endl << "Marking crystal atoms based on cluster size..." << endl;
+    
+    // Mark atoms as crystal if they belong to a cluster with at least 3 helices
     for(long int i = 1; i <= system.molnumMAX; i++)
     {
         long int helixlen = helixNum[i];
         for (long int j = 0; j < helixlen; j++)
         {
             // hout << helixNeighbor[i][j] <<"    ";
-            if(helixNeighbor[i][j] > 2)
+            pair<long int, long int> key = make_pair(i, j);
+            // Changed criterion: mark as crystal if the helix belongs to a cluster of size >= 3
+            if(helixClusterSize.find(key) != helixClusterSize.end() && helixClusterSize[key] >= 3)
             {
                 // system.atoms[rh[i][j].id - 1].crystal = true;
                 // system.atoms[rh[i][j].id + 3 - 1].crystal = true;
