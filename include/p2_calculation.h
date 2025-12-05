@@ -16,3 +16,4 @@ using namespace std;
 void printProgressP2(int k, int kmax, double p2);
 double p2calculation(System& system, long int f);
 void dumpIO_p2(System& system, ifstream& dumpFilein);
+void dumpIO_p2_slice(System& system, ifstream& dumpFilein, double zlo, double zhi, int nslice);

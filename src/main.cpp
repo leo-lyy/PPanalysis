@@ -147,12 +147,19 @@ int main()
                 processFile(dumpFileName);
                 cout << "Reading data files ..." << endl;
                 readLammpsData(dataFileName, system);
+
+                double zlol, zhil;
+                int nslice;
+                cout << endl << "Please enter Z_low_limit, Z_high_limit and n_slice to analyse the P2 in z direction:"<<endl;
+                cin >> zlol >> zhil >> nslice;
+
                 cout << "Counting the number of frames in the dump file ..." << endl;
                 system.frames = countDumpFrame(dumpFileName);
                 cout << "The dump file contains " << system.frames << " frames." << endl;
                 cout << "Calculating the P2 ..." << endl;
                 ifstream dumpFilein(dumpFileName);
-                dumpIO_p2(system, dumpFilein);
+                // dumpIO_p2(system, dumpFilein);
+                dumpIO_p2_slice(system, dumpFilein, zlol, zhil, nslice);
                 cout << endl << "Done!" << endl;
                 break;
             }
