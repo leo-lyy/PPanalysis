@@ -6,12 +6,21 @@ void reeCalculation(System& system, long int f, ofstream& Reeout)
 {
     // define the Ree as a vector of the end to end distance
     axis Ree[system.molnumMAX + 1];
-    axis Ree_sum;
-    Ree_sum.x = 0;
-    Ree_sum.y = 0;
-    Ree_sum.z = 0;
+    // set all Ree to zero
+    // for (long int i = 0; i < system.molnumMAX + 1; i++)
+    // {
+    //     Ree[i].x = 0;
+    //     Ree[i].y = 0;
+    //     Ree[i].z = 0;
+    //     Ree[i].id = 0;
+    // }
+    // axis Ree_sum;
+    // Ree_sum.x = 0;
+    // Ree_sum.y = 0;
+    // Ree_sum.z = 0;
     long int head_id = 0;                       // for 0-based index
     long int tail_id = system.molen[1] - 3;
+    Reeout << f << " " ;
     for (long int i = 1; i < system.molnumMAX + 1; i++)
     {
         // Reeout << f << " " << head_id + 1 << " " << tail_id + 1 << endl;
@@ -30,19 +39,21 @@ void reeCalculation(System& system, long int f, ofstream& Reeout)
         Ree[i].y = Ree_tail.y - Ree_head.y;
         Ree[i].z = Ree_tail.z - Ree_head.z;
         Ree[i].id = i;
-        Ree_sum.x += Ree[i].x;
-        Ree_sum.y += Ree[i].y;
-        Ree_sum.z += Ree[i].z;
+        // Ree_sum.x += Ree[i].x;
+        // Ree_sum.y += Ree[i].y;
+        // Ree_sum.z += Ree[i].z;
         if (i + 1 < system.molnumMAX + 1)
         {
             head_id += system.molen[i];
             tail_id = head_id + system.molen[i+1] - 3;
         }
+        Reeout<< Ree[i].x << " " << Ree[i].y << " " << Ree[i].z << "   ";
     }
-    Ree_sum.x /= system.molnumMAX;
-    Ree_sum.y /= system.molnumMAX;
-    Ree_sum.z /= system.molnumMAX;
-    Reeout << f << " " << Ree_sum.x << " " << Ree_sum.y << " " << Ree_sum.z << endl;
+    Reeout << endl;
+    // Ree_sum.x /= system.molnumMAX;
+    // Ree_sum.y /= system.molnumMAX;
+    // Ree_sum.z /= system.molnumMAX;
+    // Reeout << f << " " << Ree_sum.x << " " << Ree_sum.y << " " << Ree_sum.z << endl;
 }
 
 void dumpIO_Ree(System& system, ifstream& dumpFilein)
