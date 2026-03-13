@@ -7,6 +7,7 @@
 #include<cmath>
 #include<algorithm>
 #include<stdexcept>
+#include<limits>
 #include"../include/system.h"
 #include"../include/readLMPdata.h"
 #include"../include/readLMPdump.h"
@@ -16,6 +17,7 @@
 #include"../include/helix_calculation.h"
 #include"../include/rg_calculation.h"
 #include"../include/endtoend_calculation.h"
+#include"../include/msd_calculation.h"
 
 using namespace std;
 void showMenu()
@@ -78,6 +80,7 @@ void showMenu()
     cout << "  [4] Calculate the velocity profile in z direction(displacement) [not compatable for non-orthogonal box]; " << endl;
     cout << "  [5] Calculate the radius of gyration;                            " << endl;
     cout << "  [6] Calculate the <end to end distance>;                           " << endl;
+    cout << "  [7] Calculate the mean square displacement (MSD);                " << endl;
     cout << "                                                                   " << endl;
     cout << "  [0] Exit                                                         " << endl;
     cout << "------------------------------------------------------------------" << endl;
@@ -281,6 +284,26 @@ int main()
                 cout << endl << "Done!" << endl;
                 break;
             }
+            case 7: // Calculate MSD
+            {
+                cout << "Please input the data file name: ";
+                cin >> dataFileName;
+                processFile(dataFileName);
+                cout << "Please input the dump file name: ";
+                cin >> dumpFileName;
+                processFile(dumpFileName);
+                cout << "Reading files ..." << endl;
+                readLammpsData(dataFileName, system);
+                cout << "Counting the number of frames in the dump file ..." << endl;
+                system.frames = countDumpFrame(dumpFileName);
+                cout << "The dump file contains " << system.frames << " frames." << endl;
+                cout << "Calculating MSD ..." << endl;
+                ifstream dumpFilein(dumpFileName);
+                dumpIO_MSD(system, dumpFilein);
+                cout << endl << "Done!" << endl;
+                break;
+            }
+            
             
             case 0: // Exit
             {
