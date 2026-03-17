@@ -18,6 +18,7 @@
 #include"../include/rg_calculation.h"
 #include"../include/endtoend_calculation.h"
 #include"../include/msd_calculation.h"
+#include"../include/dihedral_calculation.h"
 
 using namespace std;
 void showMenu()
@@ -81,6 +82,7 @@ void showMenu()
     cout << "  [5] Calculate the radius of gyration;                            " << endl;
     cout << "  [6] Calculate the <end to end distance>;                           " << endl;
     cout << "  [7] Calculate the mean square displacement (MSD);                " << endl;
+    cout << "  [8] Calculate backbone dihedral degree;                          " << endl;
     cout << "                                                                   " << endl;
     cout << "  [0] Exit                                                         " << endl;
     cout << "------------------------------------------------------------------" << endl;
@@ -300,6 +302,25 @@ int main()
                 cout << "Calculating MSD ..." << endl;
                 ifstream dumpFilein(dumpFileName);
                 dumpIO_MSD(system, dumpFilein);
+                cout << endl << "Done!" << endl;
+                break;
+            }
+            case 8: // Calculate the dihedral degree
+            {
+                cout << "Please input the data file name: ";
+                cin >> dataFileName;
+                processFile(dataFileName);
+                cout << "Please input the dump file name: ";
+                cin >> dumpFileName;
+                processFile(dumpFileName);
+                cout << "Reading files ..." << endl;
+                readLammpsData(dataFileName, system);
+                cout << "Counting the number of frames in the dump file ..." << endl;
+                system.frames = countDumpFrame(dumpFileName);
+                cout << "The dump file contains " << system.frames << " frames." << endl;
+                cout << "Calculating backbone dihedral degree ..." << endl;
+                ifstream dumpFilein(dumpFileName);
+                dumpIO_backboneDihedral(system, dumpFilein);
                 cout << endl << "Done!" << endl;
                 break;
             }
